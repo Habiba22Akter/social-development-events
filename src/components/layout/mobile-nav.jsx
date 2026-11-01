@@ -76,6 +76,7 @@ export function MobileNav() {
                   key={item.href}
                   href={item.href}
                   onClick={close}
+                  aria-current={active ? "page" : undefined}
                   className={cn(
                     "flex items-center justify-between rounded-xl px-3 py-3 text-base font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
                     active && "bg-muted text-foreground",
