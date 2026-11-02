@@ -30,7 +30,7 @@ const privateLinks = [
 export function MobileNav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  const { user, signOut, isPending } = useAuth();
+  const { user, signOut, isPending, isSigningOut } = useAuth();
 
   const close = () => setOpen(false);
   const name = user?.name ?? user?.displayName ?? "Volunteer";
@@ -91,7 +91,18 @@ export function MobileNav() {
 
           <div className="my-6 h-px bg-border" />
 
-          {user ? (
+          {isPending ? (
+            <div
+              aria-hidden="true"
+              className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3"
+            >
+              <span className="size-10 shrink-0 animate-pulse rounded-full bg-muted" />
+              <div className="flex-1 space-y-2">
+                <span className="block h-3 w-24 animate-pulse rounded-full bg-muted" />
+                <span className="block h-2.5 w-32 animate-pulse rounded-full bg-muted" />
+              </div>
+            </div>
+          ) : user ? (
             <div className="flex flex-col gap-1">
               <div className="mb-3 flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
                 <UserAvatar user={user} className="size-10" />
@@ -117,7 +128,7 @@ export function MobileNav() {
 
               <button
                 type="button"
-                disabled={isPending}
+                disabled={isSigningOut}
                 onClick={async () => {
                   close();
                   await signOut();

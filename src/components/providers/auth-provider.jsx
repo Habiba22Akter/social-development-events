@@ -8,42 +8,64 @@ import {
   useState,
 } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
+import { authClient } from "@/lib/auth-client";
 
 /**
- * Holds the signed-in user for the whole app shell.
+ * Single source of truth for the signed-in user.
  *
- * This is the single place that will talk to BetterAuth once auth is wired up:
- * replace the local `user` state with `authClient.useSession()` (or hydrate it
- * from a server session in the root layout) and point `signOut` at
- * `authClient.signOut()`. Everything in the navbar already reads from here.
+ * The session itself lives in BetterAuth's HTTP-only cookie; `useSession()`
+ * reads it, keeps it fresh when the tab regains focus, and updates every
+ * consumer after sign-in/sign-out.
  */
 const AuthContext = createContext({
   user: null,
-  isPending: false,
-  setUser: () => {},
+  session: null,
+  isPending: true,
+  isRefetching: false,
+  isSigningOut: false,
+  refetch: async () => {},
   signOut: async () => {},
 });
 
-export function AuthProvider({ children, initialUser = null }) {
-  const [user, setUser] = useState(initialUser);
-  const [isPending, setIsPending] = useState(false);
+export function AuthProvider({ children }) {
+  const { data, isPending, isRefetching, refetch } = authClient.useSession();
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const router = useRouter();
 
   const signOut = useCallback(async () => {
-    setIsPending(true);
+    setIsSigningOut(true);
+
     try {
-      // TODO(auth): await authClient.signOut();
-      setUser(null);
+      const { error } = await authClient.signOut();
+
+      if (error) {
+        toast.error(error.message || "Could not sign you out. Try again.");
+        return;
+      }
+
+      toast.success("You are signed out.");
       router.push("/");
       router.refresh();
+    } catch {
+      toast.error("Could not sign you out. Check your connection.");
     } finally {
-      setIsPending(false);
+      setIsSigningOut(false);
     }
   }, [router]);
 
   const value = useMemo(
-    () => ({ user, isPending, setUser, signOut }),
-    [user, isPending, signOut],
+    () => ({
+      user: data?.user ?? null,
+      session: data?.session ?? null,
+      isPending,
+      isRefetching,
+      isSigningOut,
+      refetch,
+      signOut,
+    }),
+    [data, isPending, isRefetching, isSigningOut, refetch, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

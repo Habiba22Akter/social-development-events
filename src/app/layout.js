@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { Toaster } from "@/components/ui/toaster";
 import { siteConfig } from "@/lib/site";
 import { themeScript } from "@/lib/theme";
 
@@ -83,6 +84,7 @@ export default function RootLayout({ children }) {
             <main className="flex-1">{children}</main>
             <Footer />
           </AuthProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

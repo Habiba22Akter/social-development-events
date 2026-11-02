@@ -1,54 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Utsho — Community service, close to home
 
-## Getting Started
+Community-service event platform for Dhaka neighbourhoods. Next.js App Router
+(JavaScript), Tailwind v4 and shadcn (Base UI) on the front end; BetterAuth,
+Express and MongoDB on the auth server.
 
-First, run the development server:
+## Run it
+
+This project has **two** apps and both have to be running.
+
+**1. Auth server** (`../social-development-events-server`)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd ../social-development-events-server
+npm install
+cp .env.example .env    # add MONGODB_URL and BETTER_AUTH_SECRET
+npm start               # http://localhost:8000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**2. This app**
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+```bash
+npm install
+cp .env.example .env.local   # sets AUTH_SERVER_URL=http://localhost:8000
+npm run dev                  # http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open <http://localhost:3000>. The navbar's **Login** button goes to `/login`.
 
-## Learn More
+> Auth requests go to `/api/auth/*` on this app and are proxied to the Express
+> server, so the session cookie stays on this origin. If the Express server is
+> not running, sign-in shows a friendly "auth server is offline" message.
 
-To learn more about Next.js, take a look at the following resources:
+## Authentication
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Login** — email + password, plus Google and GitHub.
+- **Register** — name, email, photo URL (optional) and password.
+- **Password rule** — at least 6 characters with one uppercase and one lowercase
+  letter. Enforced in the form and again on the server.
+- Inline field errors + toasts on failure, a success toast after login/register.
+- No email verification and no forgot-password flow, as the brief requires.
+- Google login needs `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` on the auth
+  server. Redirect URI: `http://localhost:3000/api/auth/callback/google`.
+  GitHub uses `/api/auth/callback/github` with `GITHUB_CLIENT_ID` /
+  `GITHUB_CLIENT_SECRET`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Put those values in **`social-development-events-server/.env`** — that is the
+process that talks to the providers. Both buttons stay visible either way.
 
-## Deploy on Vercel
+Google credentials can be created at
+<https://console.cloud.google.com/apis/credentials>. Until they exist the social
+buttons show a clear "provider is not configured" toast instead of failing
+silently.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Commands
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `npm run dev` — dev server on port 3000 (a second instance is blocked; reuse
+  the running one).
+- `npm run lint` — ESLint 9 flat config.
+- `npm run build` — the only full verification (no test suite).
+- `npx shadcn@latest add <name>` — add UI primitives (`base-nova`, `tsx: false`).
 
+## Design
 
+Brand tokens live in `src/app/globals.css`: deep teal `--primary`, warm
+`--accent`, cream `--background`, with a matching `.dark` set. Use semantic
+utilities (`bg-card`, `text-muted-foreground`, `border-border`) — never raw
+colours. Headings use Fraunces (`font-heading`), body text Plus Jakarta Sans.
 
-<!-- 
-…or create a new repository on the command line
-echo "# social-development-events" >> README.md
-git init
-git add README.md
-git commit -m "first commit"
-git branch -M main
-git remote add origin https://github.com/Habiba22Akter/social-development-events.git
-git push -u origin main
-…or push an existing repository from the command line
-git remote add origin https://github.com/Habiba22Akter/social-development-events.git
-git branch -M main
-git push -u origin main
-
- -->
+Auth forms are customised shadcn primitives: `Field`, `Input`, `InputGroup`,
+`Label`, `Button`, `Card`, `Alert` and `Separator`, styled to the site's 44px
+control height, rounded corners and accent-topped cards.

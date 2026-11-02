@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 export function Navbar() {
   const pathname = usePathname();
-  const { user, signOut, isPending } = useAuth();
+  const { user, signOut, isPending, isSigningOut } = useAuth();
 
   return (
     <header className="sticky top-0 z-40 w-full">
@@ -67,13 +67,18 @@ export function Navbar() {
           <div className="flex items-center gap-2">
             <ThemeToggle />
 
-            {user ? (
+            {isPending ? (
+              <span
+                aria-hidden="true"
+                className="hidden h-9 w-28 animate-pulse rounded-full bg-muted lg:block"
+              />
+            ) : user ? (
               <>
                 <UserMenu user={user} />
                 <button
                   type="button"
                   onClick={signOut}
-                  disabled={isPending}
+                  disabled={isSigningOut}
                   className="hidden h-9 items-center gap-1.5 rounded-full border border-border px-3 text-sm font-medium text-muted-foreground transition-colors hover:border-destructive/30 hover:bg-destructive/10 hover:text-destructive focus-visible:ring-3 focus-visible:ring-ring/40 focus-visible:outline-none disabled:opacity-60 lg:inline-flex"
                 >
                   <LogOut className="size-4" />

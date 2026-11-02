@@ -52,7 +52,7 @@ export function UserAvatar({ user, className }) {
 }
 
 export function UserMenu({ user }) {
-  const { signOut, isPending } = useAuth();
+  const { signOut, isSigningOut } = useAuth();
   const name = user?.name ?? user?.displayName ?? "Volunteer";
   const email = user?.email ?? "";
 
@@ -117,7 +117,7 @@ export function UserMenu({ user }) {
 
             <Menu.Item
               className={cn(itemClass, "text-destructive data-highlighted:bg-destructive/10 data-highlighted:text-destructive")}
-              disabled={isPending}
+              disabled={isSigningOut}
               onClick={signOut}
             >
               <LogOut className="size-4" />
