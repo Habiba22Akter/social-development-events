@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Avatar } from "@base-ui/react/avatar";
 import {
   ArrowRight,
   Check,
@@ -24,6 +25,7 @@ import { FieldGroup } from "@/components/ui/field";
 import {
   currentRedirectTarget,
   friendlyAuthError,
+  normalizePhotoUrl,
   passwordChecks,
   validateEmail,
   validateName,
@@ -31,6 +33,7 @@ import {
   validatePhotoUrl,
 } from "@/lib/auth-form";
 import { authClient } from "@/lib/auth-client";
+import { AVATAR_IMAGE_CLASS, initialsOf } from "@/lib/avatar";
 
 const initialValues = {
   name: "",
@@ -38,6 +41,46 @@ const initialValues = {
   photoURL: "",
   password: "",
 };
+
+/** Live circular preview so people can see the crop before they sign up. */
+function PhotoPreview({ url, name }) {
+  const src = normalizePhotoUrl(url);
+  const [status, setStatus] = useState("idle");
+
+  if (!src) return null;
+
+  const failed = status === "error";
+
+  return (
+    <div className="flex items-center gap-3 rounded-xl border border-border/70 bg-muted/40 px-3 py-2">
+      <Avatar.Root
+        onLoadingStatusChange={setStatus}
+        className="inline-flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-secondary align-middle text-xs font-semibold text-secondary-foreground select-none"
+      >
+        <Avatar.Image
+          src={src}
+          alt={`Photo preview for ${name.trim() || "you"}`}
+          referrerPolicy="no-referrer"
+          className={AVATAR_IMAGE_CLASS}
+        />
+        <Avatar.Fallback className="flex size-full items-center justify-center">
+          {initialsOf(name)}
+        </Avatar.Fallback>
+      </Avatar.Root>
+
+      <div className="min-w-0 space-y-0.5">
+        <p className="text-xs font-medium text-foreground">
+          {failed ? "That image could not be loaded." : "Photo preview"}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          {failed
+            ? "Check that the link is public, or leave it blank to show your initials."
+            : "This is how you'll appear in the navbar. Close-up, roughly square photos look best."}
+        </p>
+      </div>
+    </div>
+  );
+}
 
 export function RegisterForm() {
   const router = useRouter();
@@ -90,7 +133,7 @@ export function RegisterForm() {
     setSubmitting(true);
 
     try {
-      const photoURL = values.photoURL.trim();
+      const photoURL = normalizePhotoUrl(values.photoURL);
       const { data, error } = await authClient.signUp.email({
         name: values.name.trim(),
         email: values.email.trim(),
@@ -171,11 +214,13 @@ export function RegisterForm() {
             value={values.photoURL}
             onChange={update("photoURL")}
             error={errors.photoURL}
-            hint="Optional — paste a public https:// image link. Without one we show your initials."
+            hint="Optional — a close-up photo works best. Google Drive share links are converted automatically; without one we show your initials."
             placeholder="https://example.com/your-photo.jpg"
             autoComplete="url"
             disabled={submitting}
           />
+
+          <PhotoPreview url={values.photoURL} name={values.name} />
 
           <div className="grid gap-2">
             <PasswordField

@@ -59,6 +59,39 @@ export function validatePhotoUrl(value) {
   }
 }
 
+const GOOGLE_DRIVE_HOST = /(^|\.)(drive|docs)\.google\.com$/i;
+const GOOGLE_DRIVE_ID = /\/d\/([A-Za-z0-9_-]{10,})/;
+
+/**
+ * A Drive "share" link (drive.google.com/file/d/<id>/view?usp=sharing) serves an
+ * HTML page, not an image, so <img> fails and the avatar falls back to initials.
+ * Rewrite those links to Google's public thumbnail endpoint, which returns the
+ * actual image bytes. Any other URL is returned untouched.
+ */
+export function normalizePhotoUrl(value) {
+  const url = (value ?? "").trim();
+
+  if (!url) return "";
+
+  let parsed;
+
+  try {
+    parsed = new URL(url);
+  } catch {
+    return url;
+  }
+
+  if (!GOOGLE_DRIVE_HOST.test(parsed.hostname)) return url;
+
+  const id =
+    parsed.pathname.match(GOOGLE_DRIVE_ID)?.[1] ??
+    parsed.searchParams.get("id");
+
+  if (!id) return url;
+
+  return `https://lh3.googleusercontent.com/d/${id}=w1000`;
+}
+
 export function passwordChecks(value) {
   return [
     { label: "6+ characters", ok: value.length >= 6 },

@@ -11,23 +11,16 @@ import {
   UserRound,
 } from "lucide-react";
 import { useAuth } from "@/components/providers/auth-provider";
+import { AVATAR_IMAGE_CLASS, initialsOf } from "@/lib/avatar";
+import { normalizePhotoUrl } from "@/lib/auth-form";
 import { cn } from "@/lib/utils";
 
 const itemClass =
   "flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-popover-foreground outline-none select-none transition-colors data-highlighted:bg-muted data-highlighted:text-foreground";
 
-export function initialsOf(name = "") {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-
-  if (parts.length === 0) return "U";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
-
 export function UserAvatar({ user, className }) {
   const name = user?.name ?? user?.displayName ?? "Volunteer";
-  const photo = user?.image ?? user?.photoURL;
+  const photo = normalizePhotoUrl(user?.image ?? user?.photoURL);
 
   return (
     <Avatar.Root
@@ -41,7 +34,7 @@ export function UserAvatar({ user, className }) {
           src={photo}
           alt={name}
           referrerPolicy="no-referrer"
-          className="size-full object-cover"
+          className={AVATAR_IMAGE_CLASS}
         />
       ) : null}
       <Avatar.Fallback className="flex size-full items-center justify-center">
@@ -65,7 +58,7 @@ export function UserMenu({ user }) {
         >
           <UserAvatar
             user={user}
-            className="size-9 ring-2 ring-transparent transition group-hover:ring-primary/25"
+            className="size-10 ring-2 ring-transparent transition group-hover:ring-primary/25"
           />
         </Menu.Trigger>
         <span
@@ -80,7 +73,7 @@ export function UserMenu({ user }) {
         <Menu.Positioner align="end" sideOffset={10} className="z-50 outline-none">
           <Menu.Popup className="w-64 origin-[var(--transform-origin)] rounded-2xl border border-border bg-popover p-1.5 text-popover-foreground shadow-soft outline-none transition-[transform,opacity] duration-150 ease-out data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0">
             <div className="flex items-center gap-2.5 rounded-xl bg-muted/60 px-2.5 py-2">
-              <UserAvatar user={user} className="size-8" />
+              <UserAvatar user={user} className="size-10" />
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold">{name}</p>
                 <p className="truncate text-xs text-muted-foreground">
