@@ -8,7 +8,10 @@ import { MongoClient } from "mongodb";
 const globalForMongo = globalThis;
 
 function createMongoClient() {
-  const uri = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/utsho";
+  const uri =
+    process.env.MONGODB_URI ||
+    process.env.MONGODB_URL ||
+    "mongodb://127.0.0.1:27017/utsho";
 
   return new MongoClient(uri, {
     serverSelectionTimeoutMS: 8000,
