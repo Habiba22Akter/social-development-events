@@ -14,6 +14,10 @@ import { cn } from "@/lib/utils";
 export function Navbar() {
   const pathname = usePathname();
   const { user, signOut, isPending, isSigningOut } = useAuth();
+  // Signed-out visitors only see the public links; the rest unlock after login.
+  const links = user
+    ? [...siteConfig.nav, ...siteConfig.privateNav]
+    : siteConfig.nav;
 
   return (
     <header className="sticky top-0 z-40 w-full">
@@ -38,7 +42,7 @@ export function Navbar() {
           <Logo />
 
           <div className="hidden items-center gap-1 lg:flex">
-            {siteConfig.nav.map((item) => {
+            {links.map((item) => {
               const active =
                 item.href === "/" ? pathname === "/" : pathname === item.href;
 

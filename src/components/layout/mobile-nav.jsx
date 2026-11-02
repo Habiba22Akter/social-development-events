@@ -34,6 +34,9 @@ export function MobileNav() {
 
   const close = () => setOpen(false);
   const name = user?.name ?? user?.displayName ?? "Volunteer";
+  const links = user
+    ? [...siteConfig.nav, ...siteConfig.privateNav]
+    : siteConfig.nav;
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -65,7 +68,7 @@ export function MobileNav() {
           </div>
 
           <nav className="mt-8 flex flex-col gap-1" aria-label="Main">
-            {siteConfig.nav.map((item) => {
+            {links.map((item) => {
               const active =
                 item.href === "/"
                   ? pathname === "/"

@@ -7,11 +7,17 @@ export const siteConfig = {
   email: "hello@utsho.org",
   phone: "+880 1700 000000",
   address: "House 12, Road 7, Mirpur 10, Dhaka 1216",
+  // Visible to everyone, signed in or not.
   nav: [
     { label: "Home", href: "/" },
     { label: "Upcoming Events", href: "/events" },
+  ],
+  // Only shown once the visitor is signed in. Contact lives in the footer.
+  privateNav: [
     { label: "Gallery", href: "/#gallery" },
-    { label: "Contact", href: "/#contact" },
+    { label: "Create Event", href: "/events/create" },
+    { label: "Manage Events", href: "/events/manage" },
+    { label: "Joined Events", href: "/events/joined" },
   ],
   socials: [
     { label: "X", href: "https://x.com", icon: "x" },
