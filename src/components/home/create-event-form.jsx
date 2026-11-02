@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, CalendarPlus } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 import { eventTypes } from "@/lib/site";
 
@@ -30,7 +31,8 @@ export function CreateEventForm() {
         return;
       }
 
-      router.push("/#upcoming-events");
+      toast.success("Event created successfully.");
+      router.push("/events");
       router.refresh();
     } catch {
       setMessage("The event service is unavailable. Please try again.");
@@ -55,10 +57,10 @@ export function CreateEventForm() {
           <label className="grid gap-2 text-sm font-medium">Description<textarea name="description" required maxLength={500} className="min-h-28 rounded-xl border border-input bg-background px-3 py-3 font-normal outline-none focus-visible:ring-3 focus-visible:ring-ring/40" placeholder="What will volunteers do?" /></label>
           <div className="grid gap-5 sm:grid-cols-2">
             <label className="grid gap-2 text-sm font-medium">Event type<select name="type" required className="h-11 rounded-xl border border-input bg-background px-3 font-normal outline-none focus-visible:ring-3 focus-visible:ring-ring/40"><option value="">Select a type</option>{eventTypes.map((type) => <option key={type}>{type}</option>)}</select></label>
-            <label className="grid gap-2 text-sm font-medium">Date and time<input name="date" type="datetime-local" required className="h-11 rounded-xl border border-input bg-background px-3 font-normal outline-none focus-visible:ring-3 focus-visible:ring-ring/40" /></label>
+            <label className="grid gap-2 text-sm font-medium">Date and time<input name="date" type="datetime-local" min={new Date().toISOString().slice(0, 16)} required className="h-11 rounded-xl border border-input bg-background px-3 font-normal outline-none focus-visible:ring-3 focus-visible:ring-ring/40" /></label>
           </div>
           <label className="grid gap-2 text-sm font-medium">Meeting point<input name="location" required maxLength={160} className="h-11 rounded-xl border border-input bg-background px-3 font-normal outline-none focus-visible:ring-3 focus-visible:ring-ring/40" placeholder="Mirpur 10 roundabout" /></label>
-          <label className="grid gap-2 text-sm font-medium">Cover image URL <span className="font-normal text-muted-foreground">(optional, HTTPS)</span><input name="image" type="url" className="h-11 rounded-xl border border-input bg-background px-3 font-normal outline-none focus-visible:ring-3 focus-visible:ring-ring/40" placeholder="https://..." /></label>
+          <label className="grid gap-2 text-sm font-medium">Thumbnail image URL <span className="font-normal text-muted-foreground">(HTTPS required)</span><input name="image" type="url" required pattern="https://.+" className="h-11 rounded-xl border border-input bg-background px-3 font-normal outline-none focus-visible:ring-3 focus-visible:ring-ring/40" placeholder="https://..." /></label>
           {message ? <p role="alert" className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{message}</p> : null}
           <button type="submit" disabled={isSubmitting} className="mt-2 h-12 rounded-full bg-primary px-6 text-sm font-semibold text-primary-foreground disabled:opacity-60">{isSubmitting ? "Publishing…" : "Publish event"}</button>
         </form>

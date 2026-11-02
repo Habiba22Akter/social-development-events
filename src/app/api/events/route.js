@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { connectToDatabase } from "@/lib/mongodb";
 import { serializeEvent } from "@/lib/events";
+import { eventTypes } from "@/lib/site";
 
 const authServerUrl = process.env.AUTH_SERVER_URL || "http://localhost:8000";
 
@@ -48,10 +49,28 @@ export async function POST(request) {
   const location = body.location?.trim();
   const image = body.image?.trim();
   const date = new Date(body.date);
+  let imageUrl;
 
-  if (!title || !description || !type || !location || Number.isNaN(date.getTime())) {
+  try {
+    imageUrl = new URL(image);
+  } catch {
+    imageUrl = null;
+  }
+
+  if (
+    !title ||
+    !description ||
+    !eventTypes.includes(type) ||
+    !location ||
+    !image ||
+    imageUrl?.protocol !== "https:" ||
+    Number.isNaN(date.getTime())
+  ) {
     return NextResponse.json(
-      { message: "Complete every required field with a valid event date." },
+      {
+        message:
+          "Complete every required field with a valid HTTPS thumbnail URL and event date.",
+      },
       { status: 400 },
     );
   }
@@ -69,9 +88,9 @@ export async function POST(request) {
     type,
     location,
     date,
-    image: image || null,
+    image,
     organizerId: user.id,
-    organizerName: user.name || user.email || "Utsho organiser",
+    organizerEmail: user.email,
     createdAt: new Date(),
   };
 
