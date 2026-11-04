@@ -12,7 +12,7 @@ const eventServerUrl = (
   "http://localhost:8000"
 ).replace(/\/+$/, "");
 
-async function requestJson(path, cookie) {
+async function requestJson(path, cookie, { allowStatuses = [] } = {}) {
   const response = await fetch(`${eventServerUrl}${path}`, {
     cache: "no-store",
     headers: cookie ? { cookie } : undefined,
@@ -20,6 +20,8 @@ async function requestJson(path, cookie) {
   });
 
   if (response.status === 404) return null;
+
+  if (allowStatuses.includes(response.status)) return null;
 
   if (!response.ok) {
     throw new Error(`The event service responded with ${response.status}.`);
@@ -51,4 +53,20 @@ export async function getUpcomingEventById(id, cookie) {
   );
 
   return data?.event || null;
+}
+
+/**
+ * Events the signed-in volunteer has joined, ordered by event date with
+ * upcoming drives first. Returns an empty list when the session has expired
+ * (the API answers 401) so the private page shows its empty state instead of
+ * crashing while `RequireAuth` redirects.
+ */
+export async function getJoinedEvents(cookie) {
+  if (!cookie) return [];
+
+  const data = await requestJson("/api/events/joined", cookie, {
+    allowStatuses: [401],
+  });
+
+  return data?.events || [];
 }

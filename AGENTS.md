@@ -40,7 +40,7 @@ Community-service event platform for Dhaka neighbourhoods. Next.js App Router, J
 - `src/lib/site.js` — site name, nav links, socials, and `eventTypes`. Add new nav links there.
 - `src/components/layout/` — navbar, mobile drawer, user menu, footer, logo, theme toggle.
 - `src/components/home/hero.jsx` — hero and "How it works". Home sections still missing: features, recent events, gallery, newsletter.
-- `/login` and `/register` are real pages (`auth-shell.jsx` + forms). `/events`, `/events/create` and `/events/[id]` are real features. `/events/manage` and `/events/joined` are still placeholders built with `placeholder-page.jsx`; replace them with real features.
+- `/login` and `/register` are real pages (`auth-shell.jsx` + forms). `/events`, `/events/create`, `/events/joined` and `/events/[id]` are real features. `/events/manage` is still a placeholder built with `placeholder-page.jsx`; replace it with a real feature.
 
 ## Auth and data
 
