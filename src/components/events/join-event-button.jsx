@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@/components/providers/auth-provider";
+import { actionStyles } from "@/components/ui/action";
 
 export function JoinEventButton({ eventId, initialJoined = false }) {
   const { user, isPending } = useAuth();
@@ -51,7 +52,7 @@ export function JoinEventButton({ eventId, initialJoined = false }) {
       type="button"
       onClick={handleJoin}
       disabled={isPending || isJoining || joined}
-      className="h-12 rounded-full bg-primary px-7 text-sm font-semibold text-primary-foreground transition-transform hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-60"
+      className={actionStyles({ className: "px-7" })}
     >
       {joined ? "Joined" : isJoining ? "Joining…" : user ? "Join event" : "Log in to join"}
     </button>

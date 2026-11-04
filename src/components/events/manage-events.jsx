@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -15,6 +14,12 @@ import {
 } from "lucide-react";
 
 import { EventImage } from "@/components/events/event-image";
+import { ActionLink, actionStyles } from "@/components/ui/action";
+import {
+  EmptyState,
+  PageHeader,
+  Section,
+} from "@/components/ui/section";
 import { eventTypes } from "@/lib/site";
 
 function formatEventDate(date) {
@@ -116,31 +121,19 @@ export function ManageEvents({ events }) {
   }
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-20">
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-        <div className="max-w-2xl">
-          <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <CalendarPlus className="size-6" aria-hidden="true" />
-          </div>
-          <p className="mt-6 text-xs font-semibold tracking-[0.18em] text-primary uppercase">
-            Manage events
-          </p>
-          <h1 className="mt-3 text-4xl font-semibold text-balance sm:text-5xl">
-            Your drives, fully in your hands.
-          </h1>
-          <p className="mt-4 text-muted-foreground">
-            Update the details of a drive you organise, or remove it if plans
-            change. You can only edit events you created.
-          </p>
-        </div>
-        <Link
-          href="/events/create"
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/40 focus-visible:outline-none"
-        >
-          <CalendarPlus className="size-4" aria-hidden="true" />
-          Create an event
-        </Link>
-      </div>
+    <Section>
+      <PageHeader
+        icon={CalendarPlus}
+        eyebrow="Manage events"
+        title="Your drives, fully in your hands."
+        description="Update the details of a drive you organise, or remove it if plans change. You can only edit events you created."
+        action={
+          <ActionLink href="/events/create">
+            <CalendarPlus className="size-4" aria-hidden="true" />
+            Create an event
+          </ActionLink>
+        }
+      />
 
       {events.length ? (
         <div className="mt-12 space-y-5">
@@ -206,7 +199,7 @@ export function ManageEvents({ events }) {
                         type="button"
                         onClick={() => startEditing(event)}
                         aria-expanded={isEditing}
-                        className="inline-flex h-10 items-center gap-2 rounded-full border border-border px-4 text-sm font-semibold transition-colors hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/40 focus-visible:outline-none"
+                        className={actionStyles({ variant: "secondary" })}
                       >
                         <Pencil className="size-4" aria-hidden="true" />
                         Edit
@@ -217,19 +210,19 @@ export function ManageEvents({ events }) {
                           setConfirmId(event._id);
                           setEditingEvent(null);
                         }}
-                        className="inline-flex h-10 items-center gap-2 rounded-full border border-destructive/40 px-4 text-sm font-semibold text-destructive transition-colors hover:bg-destructive/10 focus-visible:ring-3 focus-visible:ring-ring/40 focus-visible:outline-none"
+                        className={actionStyles({ variant: "destructive-outline" })}
                       >
                         <Trash2 className="size-4" aria-hidden="true" />
                         Delete
                       </button>
                       {!event.isPast ? (
-                        <Link
+                        <ActionLink
                           href={`/events/${event._id}`}
-                          className="inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 focus-visible:ring-3 focus-visible:ring-ring/40 focus-visible:outline-none"
+                          variant="ghost"
                         >
                           <Eye className="size-4" aria-hidden="true" />
                           View public page
-                        </Link>
+                        </ActionLink>
                       ) : null}
                     </div>
                   </div>
@@ -250,7 +243,7 @@ export function ManageEvents({ events }) {
                         type="button"
                         onClick={() => handleDelete(event._id)}
                         disabled={isBusy}
-                        className="inline-flex h-10 items-center gap-2 rounded-full bg-destructive px-4 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+                        className={actionStyles({ variant: "destructive" })}
                       >
                         <Trash2 className="size-4" aria-hidden="true" />
                         {isBusy ? "Deleting…" : "Yes, delete event"}
@@ -259,7 +252,7 @@ export function ManageEvents({ events }) {
                         type="button"
                         onClick={() => setConfirmId("")}
                         disabled={isBusy}
-                        className="inline-flex h-10 items-center rounded-full border border-border px-4 text-sm font-semibold transition-colors hover:bg-muted disabled:opacity-60"
+                        className={actionStyles({ variant: "secondary" })}
                       >
                         Keep event
                       </button>
@@ -365,7 +358,7 @@ export function ManageEvents({ events }) {
                       <button
                         type="submit"
                         disabled={isBusy}
-                        className="inline-flex h-11 items-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+                        className={actionStyles()}
                       >
                         {isBusy ? "Saving…" : "Save changes"}
                       </button>
@@ -373,7 +366,7 @@ export function ManageEvents({ events }) {
                         type="button"
                         onClick={stopEditing}
                         disabled={isBusy}
-                        className="inline-flex h-11 items-center rounded-full border border-border px-5 text-sm font-semibold transition-colors hover:bg-muted disabled:opacity-60"
+                        className={actionStyles({ variant: "secondary" })}
                       >
                         Cancel
                       </button>
@@ -385,26 +378,19 @@ export function ManageEvents({ events }) {
           })}
         </div>
       ) : (
-        <div className="mt-12 rounded-2xl border border-dashed border-border bg-card p-12 text-center">
-          <CalendarPlus
-            className="mx-auto size-9 text-primary"
-            aria-hidden="true"
-          />
-          <h2 className="mt-4 font-heading text-2xl font-semibold">
-            You have not created an event yet
-          </h2>
-          <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-            Publish your first community-service drive and it will show up here
-            for editing and deleting.
-          </p>
-          <Link
-            href="/events/create"
-            className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/40 focus-visible:outline-none"
-          >
-            Create an event
-          </Link>
-        </div>
+        <EmptyState
+          className="mt-10"
+          icon={CalendarPlus}
+          title="You have not created an event yet"
+          description="Publish your first community-service drive and it will show up here for editing and deleting."
+          action={
+            <ActionLink href="/events/create">
+              <CalendarPlus className="size-4" aria-hidden="true" />
+              Create an event
+            </ActionLink>
+          }
+        />
       )}
-    </section>
+    </Section>
   );
 }

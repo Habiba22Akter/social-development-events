@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { LogoMark } from "@/components/layout/logo";
 import { SocialIcon } from "@/components/icons/social-icons";
+import { ActionLink } from "@/components/ui/action";
 import { siteConfig } from "@/lib/site";
 
 const exploreLinks = [
@@ -63,19 +64,13 @@ export function Footer() {
             </div>
 
             <div className="flex flex-wrap gap-3 lg:justify-end">
-              <Link
-                href="/events"
-                className="group inline-flex h-11 items-center gap-2 rounded-full bg-accent px-5 text-sm font-semibold text-accent-foreground transition-transform hover:-translate-y-0.5 focus-visible:ring-3 focus-visible:ring-accent/50 focus-visible:outline-none"
-              >
+              <ActionLink href="/events" variant="accent">
                 Browse events
-                <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-              <Link
-                href="/events/create"
-                className="inline-flex h-11 items-center gap-2 rounded-full border border-primary-foreground/25 px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-foreground/10 focus-visible:ring-3 focus-visible:ring-primary-foreground/30 focus-visible:outline-none"
-              >
+                <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+              </ActionLink>
+              <ActionLink href="/events/create" variant="on-primary">
                 Start an event
-              </Link>
+              </ActionLink>
             </div>
           </div>
         </div>

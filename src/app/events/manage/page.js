@@ -4,6 +4,7 @@ import { connection } from "next/server";
 
 import { RequireAuth } from "@/components/auth/require-auth";
 import { ManageEvents } from "@/components/events/manage-events";
+import { Section } from "@/components/ui/section";
 import { getMyEvents } from "@/lib/events";
 
 export const metadata = {
@@ -21,17 +22,13 @@ async function ManageEventsContent() {
 
 function ManageEventsSkeleton() {
   return (
-    <section
-      aria-busy="true"
-      aria-live="polite"
-      className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-20"
-    >
+    <Section aria-busy="true" aria-live="polite">
       <span className="sr-only">Loading the events you created…</span>
       <div className="h-12 w-12 animate-pulse rounded-2xl bg-muted" />
       <div className="mt-6 h-4 w-32 animate-pulse rounded-full bg-muted" />
       <div className="mt-4 h-11 w-full max-w-xl animate-pulse rounded-xl bg-muted" />
       <div className="mt-3 h-4 w-full max-w-md animate-pulse rounded-full bg-muted" />
-      <div className="mt-12 space-y-5">
+      <div className="mt-10 space-y-5">
         {[0, 1].map((index) => (
           <div
             key={index}
@@ -42,12 +39,12 @@ function ManageEventsSkeleton() {
               <div className="h-5 w-1/2 animate-pulse rounded-full bg-muted" />
               <div className="h-3 w-full animate-pulse rounded-full bg-muted" />
               <div className="h-3 w-2/3 animate-pulse rounded-full bg-muted" />
-              <div className="h-10 w-40 animate-pulse rounded-full bg-muted" />
+              <div className="h-11 w-40 animate-pulse rounded-full bg-muted" />
             </div>
           </div>
         ))}
       </div>
-    </section>
+    </Section>
   );
 }
 

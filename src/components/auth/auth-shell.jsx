@@ -68,7 +68,7 @@ export function AuthShell({
                 <Sparkles className="size-3.5 text-accent" aria-hidden="true" />
                 Utsho community
               </p>
-              <h2 className="mt-6 max-w-sm font-heading text-[2.1rem] leading-[1.08] font-semibold text-balance">
+              <h2 className="mt-6 max-w-sm font-heading text-3xl leading-tight font-semibold tracking-tight text-balance sm:text-4xl">
                 {panelTitle}
               </h2>
               <p className="mt-4 max-w-sm text-sm leading-relaxed text-primary-foreground/80 dark:text-muted-foreground">
@@ -113,7 +113,7 @@ export function AuthShell({
               <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase">
                 {eyebrow}
               </p>
-              <h1 className="mt-3 font-heading text-3xl leading-tight font-semibold text-balance sm:text-[2.4rem]">
+              <h1 className="mt-3 font-heading text-4xl leading-[1.05] font-semibold tracking-tight text-balance sm:text-5xl">
                 {title}
               </h1>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground text-pretty">
@@ -131,7 +131,7 @@ export function AuthShell({
             </span>
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 rounded-full px-2 py-1 font-medium transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/40 focus-visible:outline-none"
+              className="inline-flex items-center gap-1.5 rounded-lg px-1 py-1 font-medium transition-colors hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/40 focus-visible:outline-none"
             >
               <ArrowLeft className="size-3.5" aria-hidden="true" />
               Back to home

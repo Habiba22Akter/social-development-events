@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import {
   ArrowRight,
   CalendarPlus,
@@ -12,6 +11,9 @@ import {
   Soup,
   Sparkles,
 } from "lucide-react";
+
+import { ActionLink } from "@/components/ui/action";
+import { Section, SectionHeading } from "@/components/ui/section";
 
 const causes = [
   { label: "Cleanup", icon: Droplets },
@@ -95,20 +97,14 @@ export function Hero() {
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Link
-              href="/events"
-              className="group inline-flex h-12 items-center gap-2 rounded-full bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-[0_16px_32px_-20px_var(--primary)] transition-transform hover:-translate-y-0.5 focus-visible:ring-3 focus-visible:ring-ring/40 focus-visible:outline-none"
-            >
+            <ActionLink href="/events">
               Find an event
-              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-            </Link>
-            <Link
-              href="/events/create"
-              className="inline-flex h-12 items-center gap-2 rounded-full border border-border bg-background/70 px-6 text-sm font-semibold transition-colors hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/40 focus-visible:outline-none"
-            >
+              <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+            </ActionLink>
+            <ActionLink href="/events/create" variant="secondary">
               <CalendarPlus className="size-4 text-primary" />
               Start an event
-            </Link>
+            </ActionLink>
           </div>
 
           <dl className="mt-10 grid max-w-lg grid-cols-3 gap-4 border-t border-border pt-6">
@@ -196,28 +192,18 @@ export function Hero() {
 
 export function HowItWorks() {
   return (
-    <section
-      id="how-it-works"
-      className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24"
-    >
-      <div className="max-w-2xl">
-        <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase">
-          How Utsho works
-        </p>
-        <h2 className="mt-3 font-heading text-3xl font-semibold text-balance sm:text-4xl">
-          Three steps between good intentions and good work.
-        </h2>
-        <p className="mt-4 text-muted-foreground">
-          No memberships, no long forms. Just a clear list of drives that need
-          hands — and a way to raise your own.
-        </p>
-      </div>
+    <Section id="how-it-works">
+      <SectionHeading
+        eyebrow="How Utsho works"
+        title="Three steps between good intentions and good work."
+        description="No memberships, no long forms. Just a clear list of drives that need hands — and a way to raise your own."
+      />
 
       <ol className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {steps.map((step, index) => (
           <li
             key={step.title}
-            className="group relative flex flex-col rounded-2xl border border-border bg-card p-6 transition-colors hover:border-primary/25"
+            className="group flex h-full flex-col rounded-2xl border border-border bg-card p-6 transition-colors hover:border-primary/25"
           >
             <span className="font-heading text-sm font-semibold text-muted-foreground/70">
               0{index + 1}
@@ -234,6 +220,6 @@ export function HowItWorks() {
           </li>
         ))}
       </ol>
-    </section>
+    </Section>
   );
 }

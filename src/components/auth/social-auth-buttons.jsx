@@ -81,7 +81,7 @@ export function SocialAuthButtons({
               variant="outline"
               onClick={() => handleSignIn(id)}
               disabled={isDisabled}
-              className={`h-11 rounded-xl border-border bg-background text-sm font-semibold ${className}`}
+              className={`h-11 rounded-full border-border bg-background text-sm font-semibold ${className}`}
             >
               {pending ? (
                 <Loader2 className="size-4 animate-spin" aria-hidden="true" />
