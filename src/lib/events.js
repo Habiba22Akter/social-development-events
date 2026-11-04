@@ -70,3 +70,17 @@ export async function getJoinedEvents(cookie) {
 
   return data?.events || [];
 }
+
+/**
+ * Every event the signed-in volunteer created, upcoming first. Same
+ * expired-session handling as `getJoinedEvents`.
+ */
+export async function getMyEvents(cookie) {
+  if (!cookie) return [];
+
+  const data = await requestJson("/api/events/mine", cookie, {
+    allowStatuses: [401],
+  });
+
+  return data?.events || [];
+}
