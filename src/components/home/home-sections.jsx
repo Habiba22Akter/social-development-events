@@ -8,10 +8,11 @@ import {
   HeartHandshake,
   Mail,
   MapPin,
+  Star,
   Users,
 } from "lucide-react";
 
-import { getUpcomingEvents } from "@/lib/events";
+import { getFeaturedEvents, getUpcomingEvents } from "@/lib/events";
 import { EventImage } from "@/components/events/event-image";
 import { ActionLink, actionStyles } from "@/components/ui/action";
 import {
@@ -69,6 +70,12 @@ export function EventCard({ event }) {
         <span className="absolute top-3 left-3 rounded-full bg-background/90 px-3 py-1 text-xs font-semibold text-primary backdrop-blur">
           {event.type}
         </span>
+        {event.featured ? (
+          <span className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground shadow-soft">
+            <Star className="size-3.5 fill-current" aria-hidden="true" />
+            Featured
+          </span>
+        ) : null}
       </div>
       <div className="flex flex-1 flex-col p-5">
         <h3 className="line-clamp-2 font-heading text-xl leading-snug font-semibold">
@@ -128,9 +135,50 @@ export function Features() {
   );
 }
 
+export async function FeaturedEvents() {
+  await connection();
+  const { events, curated } = await getFeaturedEvents();
+
+  if (!events.length) return null;
+
+  return (
+    <Section id="featured-events">
+      <SectionHeading
+        eyebrow={curated ? "Featured events" : "Featured this week"}
+        title="Drives that need hands right now."
+        description="A short list of the community-service events we are highlighting this week."
+        action={
+          <ActionLink href="/events" variant="secondary">
+            View all events
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </ActionLink>
+        }
+      />
+
+      <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {events.map((event) => (
+          <EventCard key={event._id.toString()} event={event} />
+        ))}
+      </div>
+    </Section>
+  );
+}
+
 export async function UpcomingEvents() {
   await connection();
-  const events = await getUpcomingEvents();
+  const [{ events: featured }, upcoming] = await Promise.all([
+    getFeaturedEvents(),
+    getUpcomingEvents(),
+  ]);
+
+  // Do not repeat the featured cards directly below themselves. When every
+  // upcoming event is already highlighted, this section has nothing left.
+  const featuredIds = new Set(featured.map((event) => event._id.toString()));
+  const events = upcoming.filter(
+    (event) => !featuredIds.has(event._id.toString()),
+  );
+
+  if (!events.length && featured.length) return null;
 
   return (
     <Section id="upcoming-events" muted>

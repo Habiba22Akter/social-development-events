@@ -1,6 +1,7 @@
 "use client";
 
 import { createAuthClient } from "better-auth/react";
+import { jwtClient } from "better-auth/client/plugins"
 
 /**
  * Browser-side BetterAuth client.
@@ -10,6 +11,10 @@ import { createAuthClient } from "better-auth/react";
  * browser on the same origin means the HTTP-only session cookie belongs to the
  * Next.js domain — no CORS or third-party cookie workarounds.
  */
-export const authClient = createAuthClient();
+export const authClient = createAuthClient({
+  plugins: [
+    jwtClient() 
+  ]
+});
 
 export const { signIn, signUp, signOut, useSession } = authClient;

@@ -20,6 +20,12 @@ import {
   PageHeader,
   Section,
 } from "@/components/ui/section";
+import { fetchWithToken } from "@/lib/client-token";
+import {
+  EVENT_LIMITS,
+  hasErrors,
+  validateEventInput,
+} from "@/lib/event-form";
 import { eventTypes } from "@/lib/site";
 
 function formatEventDate(date) {
@@ -48,15 +54,27 @@ export function ManageEvents({ events }) {
   const [confirmId, setConfirmId] = useState("");
   const [busyId, setBusyId] = useState("");
   const [formError, setFormError] = useState("");
+  const [formErrors, setFormErrors] = useState({});
 
   function startEditing(event) {
     setFormError("");
+    setFormErrors({});
     setConfirmId("");
     setEditingEvent(event);
   }
 
   function stopEditing() {
     setEditingEvent(null);
+    setFormError("");
+    setFormErrors({});
+  }
+
+  function handleEditChange(event) {
+    const { name } = event.target;
+
+    setFormErrors((current) =>
+      current[name] ? { ...current, [name]: undefined } : current,
+    );
     setFormError("");
   }
 
@@ -68,15 +86,30 @@ export function ManageEvents({ events }) {
 
     if (!id) return;
 
+    const form = submitEvent.currentTarget;
+    const formData = new FormData(form);
+    const values = Object.fromEntries(formData);
+    const nextErrors = validateEventInput(values, {
+      existingDate: toLocalInput(editingEvent.date),
+    });
+
+    if (hasErrors(nextErrors)) {
+      setFormErrors(nextErrors);
+      setFormError("Please fix the highlighted fields and try again.");
+      return;
+    }
+
+    setFormErrors({});
     setBusyId(id);
 
     try {
-      const response = await fetch(`/api/events/${id}`, {
+      const response = await fetchWithToken(`/api/events/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(
-          Object.fromEntries(new FormData(submitEvent.currentTarget)),
-        ),
+        body: JSON.stringify({
+          ...values,
+          featured: formData.get("featured") === "on",
+        }),
       });
       const data = await response.json().catch(() => ({}));
 
@@ -101,7 +134,9 @@ export function ManageEvents({ events }) {
     setFormError("");
 
     try {
-      const response = await fetch(`/api/events/${id}`, { method: "DELETE" });
+      const response = await fetchWithToken(`/api/events/${id}`, {
+        method: "DELETE",
+      });
       const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
@@ -263,6 +298,7 @@ export function ManageEvents({ events }) {
                 {isEditing ? (
                   <form
                     onSubmit={handleUpdate}
+                    noValidate
                     className="grid gap-5 border-t border-border bg-muted/40 p-5"
                   >
                     <p className="text-xs font-semibold tracking-[0.14em] text-muted-foreground uppercase">
@@ -273,46 +309,94 @@ export function ManageEvents({ events }) {
                         Event title
                         <input
                           name="title"
-                          required
-                          maxLength={100}
+                          maxLength={EVENT_LIMITS.title}
                           defaultValue={event.title}
+                          onChange={handleEditChange}
+                          aria-invalid={Boolean(formErrors.title)}
+                          aria-describedby={
+                            formErrors.title ? "edit-title-error" : undefined
+                          }
                           className={fieldClass}
                         />
+                        {formErrors.title ? (
+                          <span
+                            id="edit-title-error"
+                            className="text-xs font-normal text-destructive"
+                          >
+                            {formErrors.title}
+                          </span>
+                        ) : null}
                       </label>
                       <label className="grid gap-2 text-sm font-medium">
                         Meeting point
                         <input
                           name="location"
-                          required
-                          maxLength={160}
+                          maxLength={EVENT_LIMITS.location}
                           defaultValue={event.location}
+                          onChange={handleEditChange}
+                          aria-invalid={Boolean(formErrors.location)}
+                          aria-describedby={
+                            formErrors.location ? "edit-location-error" : undefined
+                          }
                           className={fieldClass}
                         />
+                        {formErrors.location ? (
+                          <span
+                            id="edit-location-error"
+                            className="text-xs font-normal text-destructive"
+                          >
+                            {formErrors.location}
+                          </span>
+                        ) : null}
                       </label>
                     </div>
                     <label className="grid gap-2 text-sm font-medium">
                       Description
                       <textarea
                         name="description"
-                        required
-                        maxLength={500}
+                        maxLength={EVENT_LIMITS.description}
                         defaultValue={event.description}
-                        className="min-h-24 rounded-xl border border-input bg-background px-3 py-3 font-normal outline-none focus-visible:ring-3 focus-visible:ring-ring/40"
+                        onChange={handleEditChange}
+                        aria-invalid={Boolean(formErrors.description)}
+                        aria-describedby={
+                          formErrors.description ? "edit-description-error" : undefined
+                        }
+                        className="min-h-24 rounded-xl border border-input bg-background px-3 py-3 font-normal outline-none focus-visible:ring-3 focus-visible:ring-ring/40 aria-invalid:border-destructive"
                       />
+                      {formErrors.description ? (
+                        <span
+                          id="edit-description-error"
+                          className="text-xs font-normal text-destructive"
+                        >
+                          {formErrors.description}
+                        </span>
+                      ) : null}
                     </label>
                     <div className="grid gap-5 sm:grid-cols-2">
                       <label className="grid gap-2 text-sm font-medium">
                         Event type
                         <select
                           name="type"
-                          required
                           defaultValue={event.type}
+                          onChange={handleEditChange}
+                          aria-invalid={Boolean(formErrors.type)}
+                          aria-describedby={
+                            formErrors.type ? "edit-type-error" : undefined
+                          }
                           className={fieldClass}
                         >
                           {eventTypes.map((type) => (
                             <option key={type}>{type}</option>
                           ))}
                         </select>
+                        {formErrors.type ? (
+                          <span
+                            id="edit-type-error"
+                            className="text-xs font-normal text-destructive"
+                          >
+                            {formErrors.type}
+                          </span>
+                        ) : null}
                       </label>
                       <label className="grid gap-2 text-sm font-medium">
                         Date and time
@@ -322,12 +406,24 @@ export function ManageEvents({ events }) {
                           min={
                             event.isPast
                               ? undefined
-                              : new Date().toISOString().slice(0, 16)
+                              : toLocalInput(new Date())
                           }
-                          required
                           defaultValue={toLocalInput(event.date)}
+                          onChange={handleEditChange}
+                          aria-invalid={Boolean(formErrors.date)}
+                          aria-describedby={
+                            formErrors.date ? "edit-date-error" : undefined
+                          }
                           className={fieldClass}
                         />
+                        {formErrors.date ? (
+                          <span
+                            id="edit-date-error"
+                            className="text-xs font-normal text-destructive"
+                          >
+                            {formErrors.date}
+                          </span>
+                        ) : null}
                       </label>
                     </div>
                     <label className="grid gap-2 text-sm font-medium">
@@ -338,11 +434,39 @@ export function ManageEvents({ events }) {
                       <input
                         name="image"
                         type="url"
-                        required
-                        pattern="https://.+"
                         defaultValue={event.image}
+                        onChange={handleEditChange}
+                        aria-invalid={Boolean(formErrors.image)}
+                        aria-describedby={
+                          formErrors.image ? "edit-image-error" : undefined
+                        }
                         className={fieldClass}
                       />
+                      {formErrors.image ? (
+                        <span
+                          id="edit-image-error"
+                          className="text-xs font-normal text-destructive"
+                        >
+                          {formErrors.image}
+                        </span>
+                      ) : null}
+                    </label>
+
+                    <label className="flex items-start gap-3 rounded-xl border border-border bg-background p-4 text-sm">
+                      <input
+                        type="checkbox"
+                        name="featured"
+                        defaultChecked={Boolean(event.featured)}
+                        className="mt-0.5 size-4 shrink-0 accent-primary"
+                      />
+                      <span>
+                        <span className="block font-medium">
+                          Feature this event on the home page
+                        </span>
+                        <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
+                          Featured drives appear in the home-page highlight section.
+                        </span>
+                      </span>
                     </label>
 
                     {formError ? (

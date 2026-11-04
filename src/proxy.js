@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
+import { clearJwtCookie, setJwtCookie } from "@/lib/auth-cookies";
+
 /**
  * Frontend security gate.
  *
@@ -77,7 +79,7 @@ function safeInternalPath(value, request) {
 async function readSession(request) {
   const cookie = request.headers.get("cookie");
 
-  if (!cookie) return null;
+  if (!cookie) return { data: null, jwt: "" };
 
   try {
     const response = await fetch(`${AUTH_SERVER_URL}/api/auth/get-session`, {
@@ -88,15 +90,19 @@ async function readSession(request) {
       signal: AbortSignal.timeout(SESSION_TIMEOUT_MS),
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) return { data: null, jwt: "" };
 
     const data = await response.json();
 
-    return data?.session && data?.user ? data : null;
+    return {
+      data: data?.session && data?.user ? data : null,
+      // BetterAuth's JWT plugin attaches a fresh access token here.
+      jwt: response.headers.get("set-auth-jwt") || "",
+    };
   } catch {
     // Unreachable or slow auth server: treat the visitor as signed out so a
     // dead token can never unlock a private page.
-    return null;
+    return { data: null, jwt: "" };
   }
 }
 
@@ -141,7 +147,9 @@ export async function proxy(request) {
     return NextResponse.next();
   }
 
-  const session = hasSessionCookie ? await readSession(request) : null;
+  const { data: session, jwt } = hasSessionCookie
+    ? await readSession(request)
+    : { data: null, jwt: "" };
 
   if (protectedRoute && !session) {
     const response = NextResponse.redirect(
@@ -149,6 +157,7 @@ export async function proxy(request) {
     );
 
     if (hasSessionCookie) clearSessionCookies(response, request);
+    clearJwtCookie(response);
 
     return response;
   }
@@ -157,11 +166,18 @@ export async function proxy(request) {
     const target =
       safeInternalPath(request.nextUrl.searchParams.get("redirect"), request) ??
       "/events";
+    const response = NextResponse.redirect(new URL(target, request.url));
 
-    return NextResponse.redirect(new URL(target, request.url));
+    if (jwt) setJwtCookie(response, jwt);
+
+    return response;
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+
+  if (jwt) setJwtCookie(response, jwt);
+
+  return response;
 }
 
 export const config = {

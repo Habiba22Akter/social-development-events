@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { JWT_COOKIE } from "@/lib/auth-cookies";
+
 /**
  * Forwards same-origin /api/events/* calls to the Express API server, keeping
  * the BetterAuth session cookie on the Next.js domain (same pattern as the
@@ -21,6 +23,26 @@ const HOP_BY_HOP = new Set([
   "transfer-encoding",
 ]);
 
+function readCookie(cookieHeader, name) {
+  if (!cookieHeader) return "";
+
+  for (const part of cookieHeader.split(";")) {
+    const index = part.indexOf("=");
+
+    if (index === -1) continue;
+
+    if (part.slice(0, index).trim() !== name) continue;
+
+    try {
+      return decodeURIComponent(part.slice(index + 1).trim());
+    } catch {
+      return part.slice(index + 1).trim();
+    }
+  }
+
+  return "";
+}
+
 function buildHeaders(request) {
   const headers = new Headers();
   const incoming = new URL(request.url);
@@ -29,6 +51,15 @@ function buildHeaders(request) {
     if (HOP_BY_HOP.has(key.toLowerCase())) return;
     headers.set(key, value);
   });
+
+  // Client Components attach the JWT themselves via `fetchWithToken`. This
+  // fallback keeps plain same-origin fetches working by reading the HTTP-only
+  // mirror cookie.
+  if (!headers.has("authorization")) {
+    const token = readCookie(request.headers.get("cookie"), JWT_COOKIE);
+
+    if (token) headers.set("authorization", `Bearer ${token}`);
+  }
 
   headers.set("x-forwarded-host", incoming.host);
   headers.set("x-forwarded-proto", incoming.protocol.replace(":", ""));

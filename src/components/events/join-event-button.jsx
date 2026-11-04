@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@/components/providers/auth-provider";
 import { actionStyles } from "@/components/ui/action";
+import { fetchWithToken } from "@/lib/client-token";
 
 export function JoinEventButton({ eventId, initialJoined = false }) {
   const { user, isPending } = useAuth();
@@ -22,7 +23,7 @@ export function JoinEventButton({ eventId, initialJoined = false }) {
     setIsJoining(true);
 
     try {
-      const response = await fetch(`/api/events/${eventId}/join`, {
+      const response = await fetchWithToken(`/api/events/${eventId}/join`, {
         method: "POST",
       });
       const data = await response.json().catch(() => ({}));

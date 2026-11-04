@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { clearJwtCookie, setJwtCookie } from "@/lib/auth-cookies";
+
 /**
  * Everything under /api/auth/* is owned by the Express auth server.
  *
@@ -94,8 +96,7 @@ async function forward(request) {
 
   try {
     const upstream = await fetch(upstreamUrl(request), init);
-
-    return new Response(
+    const response = new NextResponse(
       request.method === "HEAD" ? null : upstream.body,
       {
         status: upstream.status,
@@ -103,6 +104,25 @@ async function forward(request) {
         headers: copyResponseHeaders(upstream),
       },
     );
+
+    // BetterAuth attaches the signed JWT to `/get-session` responses. Mirror
+    // it into the HTTP-only `utsho.jwt` cookie so Server Components and the
+    // Express API can use it without asking the browser for it.
+    const jwt = upstream.headers.get("set-auth-jwt");
+    const pathname = new URL(request.url).pathname;
+
+    if (jwt) {
+      setJwtCookie(response, jwt);
+    } else if (pathname.endsWith("/get-session")) {
+      // No session means any cached token is stale.
+      clearJwtCookie(response);
+    }
+
+    if (pathname.endsWith("/sign-out")) {
+      clearJwtCookie(response);
+    }
+
+    return response;
   } catch (error) {
     console.error("Auth proxy failed:", error);
 
