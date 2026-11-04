@@ -16,9 +16,7 @@ import { clearJwtCookie, setJwtCookie } from "@/lib/auth-cookies";
  * the session on every request, and `RequireAuth` re-checks it in the browser,
  * so a request that somehow slips past the proxy still cannot read private data.
  */
-const AUTH_SERVER_URL = (
-  process.env.AUTH_SERVER_URL || "http://localhost:8000"
-).replace(/\/+$/, "");
+const AUTH_SERVER_URL = (process.env.AUTH_SERVER_URL || "").replace(/\/+$/, "");
 
 /** Pages that require a signed-in volunteer. */
 const PROTECTED_PREFIXES = ["/events/create", "/events/manage", "/events/joined"];

@@ -3,7 +3,7 @@ export const siteConfig = {
   tagline: "Community service, close to home.",
   description:
     "Utsho connects volunteers in Dhaka with social service events — winter clothes drives, blanket distributions, cleanups, plantations and more.",
-  url: "https://utsho.vercel.app",
+  url: process.env.NEXT_PUBLIC_APP_URL,
   email: "hello@utsho.org",
   phone: "+880 1700 000000",
   address: "House 12, Road 7, Mirpur 10, Dhaka 1216",

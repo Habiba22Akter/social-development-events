@@ -12,9 +12,7 @@ import { JWT_COOKIE } from "@/lib/auth-cookies";
  * session cookie is enough to mint a token even before the browser has called
  * `/get-session` and received the `set-auth-jwt` header.
  */
-const AUTH_SERVER_URL = (
-  process.env.AUTH_SERVER_URL || "http://localhost:8000"
-).replace(/\/+$/, "");
+const AUTH_SERVER_URL = (process.env.AUTH_SERVER_URL || "").replace(/\/+$/, "");
 
 const TOKEN_TIMEOUT_MS = 5000;
 const EXPIRY_SKEW_MS = 5000;

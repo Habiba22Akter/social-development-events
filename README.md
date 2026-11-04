@@ -4,6 +4,22 @@ Community-service event platform for Dhaka neighbourhoods. Next.js App Router
 (JavaScript), Tailwind v4 and shadcn (Base UI) on the front end; BetterAuth,
 Express and MongoDB on the auth server.
 
+## Submission links
+
+- **Live site:** <https://social-development-events-zeta.vercel.app>
+- **Client repository:** <https://github.com/Habiba22Akter/social-development-events>
+- **Server repository:** <https://github.com/Habiba22Akter/social-development-events-server>
+
+## Features
+
+- Browse upcoming community-service events with dynamic MongoDB data.
+- Create, update and delete events with server-side ownership checks.
+- Join events and view a personal list of joined events.
+- Email/password authentication with optional Google and GitHub sign-in.
+- JWT-protected event APIs with BetterAuth and backend signature verification.
+- Light/dark theme switching with persisted user preference.
+- Responsive Dhaka-focused design with gallery, newsletter and contact footer.
+
 ## Run it
 
 This project has **two** apps and both have to be running.
@@ -59,6 +75,17 @@ silently.
 - `npm run lint` — ESLint 9 flat config.
 - `npm run build` — the only full verification (no test suite).
 - `npx shadcn@latest add <name>` — add UI primitives (`base-nova`, `tsx: false`).
+
+## Challenge requirements
+
+- Create and update event forms validate required fields, limits, dates, types
+  and image URLs before submission.
+- Login and registration forms validate their fields inline and repeat critical
+  password validation on the auth server.
+- The theme toggle changes the complete application between light and dark
+  palettes and remembers the selection.
+- BetterAuth issues short-lived JWTs, the Next.js client and Server Components
+  forward them, and the Express API verifies them before protected operations.
 
 ## Design
 

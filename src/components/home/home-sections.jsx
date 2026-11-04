@@ -47,7 +47,7 @@ const gallery = [
   { id: 6994982, alt: "Community members sharing donated food" },
   { id: 6646918, alt: "Volunteers cleaning a public space" },
   { id: 6646848, alt: "People sorting supplies for a donation drive" },
-  { id: 6994981, alt: "Neighbours working together outdoors" },
+  { id: 6994983, alt: "Neighbours working together outdoors" },
   { id: 6646919, alt: "Volunteers carrying community supplies" },
 ];
 

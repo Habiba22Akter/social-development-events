@@ -146,7 +146,11 @@ export function safeRedirect(value, fallback = "/events") {
   if (/[\u0000-\u001f\u007f]/.test(value)) return fallback;
 
   const origin =
-    typeof window === "undefined" ? "http://localhost" : window.location.origin;
+    typeof window === "undefined"
+      ? process.env.NEXT_PUBLIC_APP_URL
+      : window.location.origin;
+
+  if (!origin) return fallback;
 
   let url;
 

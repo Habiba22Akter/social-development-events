@@ -13,7 +13,7 @@ import { getServerToken } from "@/lib/jwt-token";
 const eventServerUrl = (
   process.env.EVENT_SERVER_URL ||
   process.env.AUTH_SERVER_URL ||
-  "http://localhost:8000"
+  ""
 ).replace(/\/+$/, "");
 
 async function requestJson(

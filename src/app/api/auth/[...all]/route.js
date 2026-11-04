@@ -9,9 +9,7 @@ import { clearJwtCookie, setJwtCookie } from "@/lib/auth-cookies";
  * session cookie stays on the Next.js domain (no CORS, no third-party cookie
  * problems). The request is forwarded server-to-server.
  */
-const AUTH_SERVER_URL = (
-  process.env.AUTH_SERVER_URL || "http://localhost:8000"
-).replace(/\/+$/, "");
+const AUTH_SERVER_URL = (process.env.AUTH_SERVER_URL || "").replace(/\/+$/, "");
 
 const FORWARDABLE_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"];
 

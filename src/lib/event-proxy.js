@@ -10,7 +10,7 @@ import { JWT_COOKIE } from "@/lib/auth-cookies";
 const eventServerUrl = (
   process.env.EVENT_SERVER_URL ||
   process.env.AUTH_SERVER_URL ||
-  "http://localhost:8000"
+  ""
 ).replace(/\/+$/, "");
 
 const FORWARDABLE_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"];
