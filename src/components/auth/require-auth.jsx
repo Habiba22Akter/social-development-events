@@ -11,8 +11,10 @@ import { useAuth } from "@/components/providers/auth-provider";
  *
  * It deliberately waits for the session query to settle before redirecting,
  * so reloading a private route with a valid cookie never bounces you to login.
- * The `proxy.js` cookie check is the first line of defence; every real API
- * call re-validates the session on the server.
+ * `proxy.js` has already validated the cookie against the auth server before
+ * this page rendered; this guard covers client-side transitions and a session
+ * that expires while the tab stays open. Every real API call re-validates the
+ * session on the server.
  */
 export function RequireAuth({ children }) {
   const { user, isPending, isSigningOut } = useAuth();

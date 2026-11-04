@@ -132,12 +132,33 @@ export function friendlyAuthError(
   return AUTH_ERROR_MESSAGES[code] || message || fallback;
 }
 
-/** Only allow same-site, root-relative paths so `?redirect=` can't be abused. */
+/**
+ * Only allow same-origin, root-relative paths so `?redirect=` can't be abused.
+ *
+ * A plain `startsWith("/")` check is not enough: browsers treat `/\evil.com`
+ * as a protocol-relative URL, so the parsed origin is what decides.
+ */
 export function safeRedirect(value, fallback = "/events") {
   if (typeof value !== "string" || !value) return fallback;
-  if (!value.startsWith("/") || value.startsWith("//")) return fallback;
+  if (!value.startsWith("/") || value.startsWith("//") || value.includes("\\")) {
+    return fallback;
+  }
+  if (/[\u0000-\u001f\u007f]/.test(value)) return fallback;
 
-  return value;
+  const origin =
+    typeof window === "undefined" ? "http://localhost" : window.location.origin;
+
+  let url;
+
+  try {
+    url = new URL(value, origin);
+  } catch {
+    return fallback;
+  }
+
+  if (url.origin !== origin) return fallback;
+
+  return `${url.pathname}${url.search}${url.hash}`;
 }
 
 export function currentRedirectTarget(fallback = "/events") {
