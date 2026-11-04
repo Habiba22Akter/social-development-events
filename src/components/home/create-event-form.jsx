@@ -15,6 +15,7 @@ export function CreateEventForm() {
   const [message, setMessage] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [imageError, setImageError] = useState("");
+  const [previewError, setPreviewError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const normalizedImage = normalizeImageUrl(imageUrl);
 
@@ -56,6 +57,7 @@ export function CreateEventForm() {
     const value = event.target.value;
     setImageUrl(value);
     setImageError(normalizeImageUrl(value).error);
+    setPreviewError("");
   }
 
   return (
@@ -81,8 +83,11 @@ export function CreateEventForm() {
           {normalizedImage.url && !imageError ? (
             <div className="grid gap-2">
               <div className="relative h-48 overflow-hidden rounded-xl border border-border bg-muted">
-                <Image src={normalizedImage.url} alt="Thumbnail preview" fill unoptimized sizes="(min-width: 768px) 672px, 100vw" className="object-cover" onError={() => setImageError("This URL could not load an image. Use a direct .jpg, .png, or .webp link, or a shared Google Drive file.")} />
+                <Image src={normalizedImage.url} alt="Thumbnail preview" fill sizes="(min-width: 768px) 672px, 100vw" className="object-cover" onLoad={() => setPreviewError("")} onError={() => setPreviewError("The preview could not load in your browser. You can still publish — the server will check the image before saving it.")} />
               </div>
+              {previewError ? (
+                <p className="text-xs text-destructive">{previewError}</p>
+              ) : null}
               {normalizedImage.converted ? (
                 <p className="text-xs text-muted-foreground">Google Drive link detected — the shared file will be used as the thumbnail.</p>
               ) : null}

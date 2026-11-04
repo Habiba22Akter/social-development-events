@@ -1,5 +1,7 @@
 import { Suspense } from "react";
+import { headers } from "next/headers";
 import Link from "next/link";
+import { connection } from "next/server";
 import { ArrowLeft, CalendarDays, MapPin, Users } from "lucide-react";
 
 import { EventImage } from "@/components/events/event-image";
@@ -20,8 +22,11 @@ function formatEventDate(date) {
 }
 
 async function EventDetailsContent({ params }) {
+  await connection();
+
   const { id } = await params;
-  const event = await getUpcomingEventById(id);
+  const cookie = (await headers()).get("cookie");
+  const event = await getUpcomingEventById(id, cookie);
 
   if (!event) {
     return (
@@ -90,11 +95,19 @@ async function EventDetailsContent({ params }) {
           </div>
 
           <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Users className="size-4 text-primary" aria-hidden="true" />
-              {event.participants?.length || 0} volunteer{event.participants?.length === 1 ? "" : "s"} joined
-            </p>
-            <JoinEventButton eventId={event._id.toString()} />
+            <div className="space-y-1">
+              <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Users className="size-4 text-primary" aria-hidden="true" />
+                {event.participantCount || 0} volunteer{event.participantCount === 1 ? "" : "s"} joined
+              </p>
+              {event.isOrganizer ? (
+                <p className="text-xs font-medium text-primary">You are organising this event.</p>
+              ) : null}
+            </div>
+            <JoinEventButton
+              eventId={event._id}
+              initialJoined={event.joinedByViewer}
+            />
           </div>
         </div>
       </article>

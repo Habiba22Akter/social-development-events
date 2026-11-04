@@ -40,7 +40,7 @@ Community-service event platform for Dhaka neighbourhoods. Next.js App Router, J
 - `src/lib/site.js` — site name, nav links, socials, and `eventTypes`. Add new nav links there.
 - `src/components/layout/` — navbar, mobile drawer, user menu, footer, logo, theme toggle.
 - `src/components/home/hero.jsx` — hero and "How it works". Home sections still missing: features, recent events, gallery, newsletter.
-- `/login` and `/register` are real pages (`auth-shell.jsx` + forms). `/events`, `/events/create`, `/events/manage`, `/events/joined` are still placeholders built with `placeholder-page.jsx`; replace them with real features.
+- `/login` and `/register` are real pages (`auth-shell.jsx` + forms). `/events`, `/events/create` and `/events/[id]` are real features. `/events/manage` and `/events/joined` are still placeholders built with `placeholder-page.jsx`; replace them with real features.
 
 ## Auth and data
 
@@ -51,7 +51,9 @@ Community-service event platform for Dhaka neighbourhoods. Next.js App Router, J
 - `src/components/providers/auth-provider.jsx` wraps `authClient.useSession()` and exposes `user`, `session`, `isPending`, `isRefetching`, `isSigningOut`, `refetch` and `signOut`. The navbar, drawer and user menu all read from `useAuth()`.
 - Email/password plus Google and GitHub providers are configured on the Express server. Google/GitHub only activate when `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` or `GITHUB_*` are set in the server `.env`; both `.env.example` files list every variable. Both social buttons always render — an unconfigured provider shows a friendly "not configured" toast instead of failing silently.
 - Private routes are protected in two layers: `src/proxy.js` redirects when the BetterAuth session cookie is missing, and `RequireAuth` waits for the session query before redirecting client-side. Never rely on the proxy alone for data access.
-- Event data/APIs (and their session checks) are still to be built; add them to the Express server and proxy them the same way as auth.
+- Event data/APIs live on the Express server (`src/events.js`): `GET/POST /api/events`, `GET /api/events/:id`, `POST /api/events/:id/join`. `src/app/api/events/route.js` and `src/app/api/events/[...path]/route.js` proxy `/api/events/*` there (same cookie-preserving pattern as auth). Server Components read events through `src/lib/events.js`, which fetches that API; the Next app no longer opens its own MongoDB connection.
+- The Express server uses `MONGODB_DB=utsho`. `src/lib/mongodb.js` (reference only) points at the old default database, so do not use it for new features.
+- Joins are stored inside the event document as `participants: [{ userId, name, email, joinedAt }]`. The join endpoint is idempotent: a duplicate request returns `200` with `alreadyJoined: true`. Only the volunteer's name and count are exposed publicly; emails stay in the database.
 
 ## UI conventions
 

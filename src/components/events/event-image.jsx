@@ -45,7 +45,6 @@ export function EventImage({
       alt={alt}
       fill
       priority={priority}
-      unoptimized={activeSrc === primarySrc}
       sizes={sizes}
       className={className}
       onError={() => setFailedSrc(activeSrc)}
