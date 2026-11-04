@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { connection } from "next/server";
 import {
   ArrowRight,
   CalendarDays,
@@ -11,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { getUpcomingEvents } from "@/lib/events";
+import { EventImage } from "@/components/events/event-image";
 
 const photo = (id, width = 900) =>
   `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${width}`;
@@ -49,14 +51,12 @@ function formatEventDate(date) {
   }).format(new Date(date));
 }
 
-function EventCard({ event }) {
+export function EventCard({ event }) {
   return (
     <article className="group overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition-transform hover:-translate-y-1">
       <div className="relative aspect-[16/9] overflow-hidden bg-muted">
-        <Image
-          src={event.image || photo(11319521, 800)}
-          alt=""
-          fill
+        <EventImage
+          src={event.image}
           sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
@@ -79,6 +79,12 @@ function EventCard({ event }) {
             {event.location}
           </p>
         </div>
+        <Link
+          href={`/events/${event._id.toString()}`}
+          className="mt-5 inline-flex h-10 w-full items-center justify-center rounded-full border border-border text-sm font-semibold transition-colors hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/40 focus-visible:outline-none"
+        >
+          View event
+        </Link>
       </div>
     </article>
   );
@@ -109,6 +115,7 @@ export function Features() {
 }
 
 export async function UpcomingEvents() {
+  await connection();
   const events = await getUpcomingEvents();
 
   return (

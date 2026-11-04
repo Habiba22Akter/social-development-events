@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Loader2, ShieldCheck } from "lucide-react";
 
@@ -15,16 +15,29 @@ import { useAuth } from "@/components/providers/auth-provider";
  * call re-validates the session on the server.
  */
 export function RequireAuth({ children }) {
-  const { user, isPending } = useAuth();
+  const { user, isPending, isSigningOut } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  // Remembers that this page was rendered for a signed-in volunteer. If the
+  // session then disappears, it was a sign-out (not an expired cookie), so the
+  // volunteer goes home instead of being bounced to the login form.
+  const wasSignedIn = useRef(false);
+
+  useEffect(() => {
+    if (user) wasSignedIn.current = true;
+  }, [user]);
 
   useEffect(() => {
     if (isPending || user) return;
 
+    if (isSigningOut || wasSignedIn.current) {
+      router.replace("/");
+      return;
+    }
+
     const redirect = pathname ? `?redirect=${encodeURIComponent(pathname)}` : "";
     router.replace(`/login${redirect}`);
-  }, [isPending, user, pathname, router]);
+  }, [isPending, user, isSigningOut, pathname, router]);
 
   if (isPending || !user) {
     return (
@@ -38,9 +51,11 @@ export function RequireAuth({ children }) {
           aria-live="polite"
           className="mt-5 text-sm font-medium text-muted-foreground"
         >
-          {isPending
-            ? "Checking your session…"
-            : "Taking you to the login page…"}
+          {isSigningOut
+            ? "Signing you out…"
+            : isPending
+              ? "Checking your session…"
+              : "Redirecting you…"}
         </p>
         <p className="mt-2 text-xs text-muted-foreground/80">
           Protected page · Utsho

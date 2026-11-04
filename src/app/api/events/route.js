@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 
 import { connectToDatabase } from "@/lib/mongodb";
-import { serializeEvent } from "@/lib/events";
+import { isLoadableImageUrl, serializeEvent } from "@/lib/events";
+import { normalizeImageUrl } from "@/lib/image-url";
 import { eventTypes } from "@/lib/site";
 
 const authServerUrl = process.env.AUTH_SERVER_URL || "http://localhost:8000";
@@ -49,27 +51,32 @@ export async function POST(request) {
   const location = body.location?.trim();
   const image = body.image?.trim();
   const date = new Date(body.date);
-  let imageUrl;
-
-  try {
-    imageUrl = new URL(image);
-  } catch {
-    imageUrl = null;
-  }
+  const { url: imageUrl, error: imageUrlError } = normalizeImageUrl(image);
 
   if (
     !title ||
     !description ||
     !eventTypes.includes(type) ||
     !location ||
-    !image ||
-    imageUrl?.protocol !== "https:" ||
+    !imageUrl ||
+    imageUrlError ||
     Number.isNaN(date.getTime())
   ) {
     return NextResponse.json(
       {
         message:
+          imageUrlError ||
           "Complete every required field with a valid HTTPS thumbnail URL and event date.",
+      },
+      { status: 400 },
+    );
+  }
+
+  if (!(await isLoadableImageUrl(imageUrl))) {
+    return NextResponse.json(
+      {
+        message:
+          "That thumbnail URL does not load as an image. Paste a direct image link (for example https://example.com/photo.jpg) or a shared Google Drive link.",
       },
       { status: 400 },
     );
@@ -88,14 +95,17 @@ export async function POST(request) {
     type,
     location,
     date,
-    image,
+    image: imageUrl,
     organizerId: user.id,
     organizerEmail: user.email,
     createdAt: new Date(),
+    participants: [],
   };
 
   const database = await connectToDatabase();
   const result = await database.collection("events").insertOne(event);
+  revalidatePath("/");
+  revalidatePath("/events");
 
   return NextResponse.json(
     { event: serializeEvent({ ...event, _id: result.insertedId }) },

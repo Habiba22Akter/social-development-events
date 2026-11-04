@@ -1,21 +1,32 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, CalendarPlus } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
+import { normalizeImageUrl } from "@/lib/image-url";
 import { eventTypes } from "@/lib/site";
 
 export function CreateEventForm() {
   const router = useRouter();
   const [message, setMessage] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [imageError, setImageError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const normalizedImage = normalizeImageUrl(imageUrl);
 
   async function handleSubmit(event) {
     event.preventDefault();
     setMessage("");
+
+    if (imageError) {
+      setMessage(imageError);
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -41,6 +52,12 @@ export function CreateEventForm() {
     }
   }
 
+  function handleImageChange(event) {
+    const value = event.target.value;
+    setImageUrl(value);
+    setImageError(normalizeImageUrl(value).error);
+  }
+
   return (
     <section className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8 lg:py-20">
       <Link href="/events" className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground">
@@ -60,7 +77,17 @@ export function CreateEventForm() {
             <label className="grid gap-2 text-sm font-medium">Date and time<input name="date" type="datetime-local" min={new Date().toISOString().slice(0, 16)} required className="h-11 rounded-xl border border-input bg-background px-3 font-normal outline-none focus-visible:ring-3 focus-visible:ring-ring/40" /></label>
           </div>
           <label className="grid gap-2 text-sm font-medium">Meeting point<input name="location" required maxLength={160} className="h-11 rounded-xl border border-input bg-background px-3 font-normal outline-none focus-visible:ring-3 focus-visible:ring-ring/40" placeholder="Mirpur 10 roundabout" /></label>
-          <label className="grid gap-2 text-sm font-medium">Thumbnail image URL <span className="font-normal text-muted-foreground">(HTTPS required)</span><input name="image" type="url" required pattern="https://.+" className="h-11 rounded-xl border border-input bg-background px-3 font-normal outline-none focus-visible:ring-3 focus-visible:ring-ring/40" placeholder="https://..." /></label>
+          <label className="grid gap-2 text-sm font-medium">Thumbnail image URL <span className="font-normal text-muted-foreground">(HTTPS required)</span><input name="image" type="url" value={imageUrl} onChange={handleImageChange} required pattern="https://.+" className="h-11 rounded-xl border border-input bg-background px-3 font-normal outline-none focus-visible:ring-3 focus-visible:ring-ring/40" placeholder="https://..." />{imageError ? <span className="text-xs font-normal text-destructive">{imageError}</span> : null}</label>
+          {normalizedImage.url && !imageError ? (
+            <div className="grid gap-2">
+              <div className="relative h-48 overflow-hidden rounded-xl border border-border bg-muted">
+                <Image src={normalizedImage.url} alt="Thumbnail preview" fill unoptimized sizes="(min-width: 768px) 672px, 100vw" className="object-cover" onError={() => setImageError("This URL could not load an image. Use a direct .jpg, .png, or .webp link, or a shared Google Drive file.")} />
+              </div>
+              {normalizedImage.converted ? (
+                <p className="text-xs text-muted-foreground">Google Drive link detected — the shared file will be used as the thumbnail.</p>
+              ) : null}
+            </div>
+          ) : null}
           {message ? <p role="alert" className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">{message}</p> : null}
           <button type="submit" disabled={isSubmitting} className="mt-2 h-12 rounded-full bg-primary px-6 text-sm font-semibold text-primary-foreground disabled:opacity-60">{isSubmitting ? "Publishing…" : "Publish event"}</button>
         </form>
