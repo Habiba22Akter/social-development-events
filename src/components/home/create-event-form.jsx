@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, CalendarPlus } from "lucide-react";
+import { ArrowLeft, CalendarPlus, ImageOff } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -44,6 +44,7 @@ export function CreateEventForm() {
       }
 
       toast.success("Event created successfully.");
+      if (data.notice) toast.info(data.notice);
       router.push("/events");
       router.refresh();
     } catch {
@@ -79,14 +80,21 @@ export function CreateEventForm() {
             <label className="grid gap-2 text-sm font-medium">Date and time<input name="date" type="datetime-local" min={new Date().toISOString().slice(0, 16)} required className="h-11 rounded-xl border border-input bg-background px-3 font-normal outline-none focus-visible:ring-3 focus-visible:ring-ring/40" /></label>
           </div>
           <label className="grid gap-2 text-sm font-medium">Meeting point<input name="location" required maxLength={160} className="h-11 rounded-xl border border-input bg-background px-3 font-normal outline-none focus-visible:ring-3 focus-visible:ring-ring/40" placeholder="Mirpur 10 roundabout" /></label>
-          <label className="grid gap-2 text-sm font-medium">Thumbnail image URL <span className="font-normal text-muted-foreground">(HTTPS required)</span><input name="image" type="url" value={imageUrl} onChange={handleImageChange} required pattern="https://.+" className="h-11 rounded-xl border border-input bg-background px-3 font-normal outline-none focus-visible:ring-3 focus-visible:ring-ring/40" placeholder="https://..." />{imageError ? <span className="text-xs font-normal text-destructive">{imageError}</span> : null}</label>
+          <label className="grid gap-2 text-sm font-medium">Thumbnail image URL <span className="font-normal text-muted-foreground">(direct image link, a page link, or a Google Drive file)</span><input name="image" type="url" value={imageUrl} onChange={handleImageChange} required pattern="https://.+" className="h-11 rounded-xl border border-input bg-background px-3 font-normal outline-none focus-visible:ring-3 focus-visible:ring-ring/40" placeholder="https://example.com/photo.jpg" />{imageError ? <span className="text-xs font-normal text-destructive">{imageError}</span> : null}</label>
           {normalizedImage.url && !imageError ? (
             <div className="grid gap-2">
               <div className="relative h-48 overflow-hidden rounded-xl border border-border bg-muted">
-                <Image src={normalizedImage.url} alt="Thumbnail preview" fill sizes="(min-width: 768px) 672px, 100vw" className="object-cover" onLoad={() => setPreviewError("")} onError={() => setPreviewError("The preview could not load in your browser. You can still publish — the server will check the image before saving it.")} />
+                {previewError ? (
+                  <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
+                    <ImageOff className="size-6" aria-hidden="true" />
+                    <span className="text-xs font-medium">Preview unavailable</span>
+                  </div>
+                ) : (
+                  <Image src={normalizedImage.url} alt="Thumbnail preview" fill sizes="(min-width: 768px) 672px, 100vw" className="object-cover" onLoad={() => setPreviewError("")} onError={() => setPreviewError("Preview unavailable here. If this is a page link, its preview image is used on publish — and if the page has none, a default community photo is used.")} />
+                )}
               </div>
               {previewError ? (
-                <p className="text-xs text-destructive">{previewError}</p>
+                <p className="text-xs text-muted-foreground">{previewError}</p>
               ) : null}
               {normalizedImage.converted ? (
                 <p className="text-xs text-muted-foreground">Google Drive link detected — the shared file will be used as the thumbnail.</p>

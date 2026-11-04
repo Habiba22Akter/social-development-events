@@ -81,6 +81,7 @@ export function ManageEvents({ events }) {
       }
 
       toast.success("Event updated successfully.");
+      if (data.notice) toast.info(data.notice);
       stopEditing();
       router.refresh();
     } catch {
